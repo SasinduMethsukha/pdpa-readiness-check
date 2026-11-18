@@ -1,7 +1,5 @@
 # PDPA Readiness Check
 
-Built by [Sasindu Methsukha](https://github.com/SasinduMethsukha).
-
 A free self-assessment for Sri Lankan organisations preparing for the Personal Data Protection Act, No. 9 of 2022 (as amended by Act No. 22 of 2025).
 
 - Every question cites the section of the Act it tests
