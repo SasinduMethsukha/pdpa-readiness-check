@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDPA Readiness Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Single light theme by choice. Layout idea: a calm editorial page. One question at a time, with the
+   section reference set like a statute's marginal note; results read like a short audit memo. */
+:root{
+  --bg:#F7F7F5; --surface:#FFFFFF; --ink:#16181C; --ink-2:#3A3E45; --muted:#6B7078; --line:#E4E3DE; --line-2:#EFEEEA;
+  --accent:#7A1631; --accent-2:#9C2447; --accent-soft:#F6E9ED; --gold:#A87412; --gold-soft:#FBF2E1;
+  --good:#1D7349; --good-soft:#E6F3EC; --warn:#9C5A00; --warn-soft:#FCF0DC; --bad:#B0281B; --bad-soft:#FBE8E5;
+  --display:"Newsreader", Georgia, "Times New Roman", serif;
+  --body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  --shadow:0 1px 2px rgba(22,24,28,.04), 0 8px 24px -12px rgba(22,24,28,.12);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.hidden{display:none!important}
+
+/* Top bar */
+.bar{position:sticky;top:0;z-index:5;background:rgba(247,247,245,.86);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;border:0;background:none;cursor:pointer;padding:0}
+.seal{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--accent);display:grid;place-items:center;color:var(--accent);font:600 13px var(--display);letter-spacing:.02em}
+.brand b{font:600 19px/1 var(--display);letter-spacing:-.01em}
+.brand b i{font-style:italic;font-weight:400;color:var(--accent)}
+.crumbs{display:flex;gap:2px;align-items:center}
+.crumb{border:0;background:none;padding:8px 12px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.crumb:hover{color:var(--ink);background:var(--line-2)}
+.crumb[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+.crumb:disabled{opacity:.4;cursor:default;background:none}
+.days{font-size:13px;color:var(--muted);white-space:nowrap}
+.days b{font:600 16px var(--display);color:var(--accent)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 18px;font-weight:600;font-size:14.5px;cursor:pointer;transition:border-color .15s, background .15s, transform .15s}
+.btn:hover{border-color:#C9C7C0}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.lg{padding:14px 26px;font-size:15.5px}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn.link{border:0;background:none;padding:6px 4px;color:var(--accent)}
+.btn.link:hover{text-decoration:underline}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.kbd{font:500 11px var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;color:var(--muted);background:var(--surface)}
+
+main{padding:0 0 80px}
+.eyebrow{font:600 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3{text-wrap:balance}
+
+/* Home */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:56px;align-items:end;padding:64px 0 48px}
+.hero h1{font:400 clamp(40px,6vw,72px)/1.02 var(--display);letter-spacing:-.025em;margin:18px 0 18px}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p.lede{font-size:18px;color:var(--ink-2);max-width:54ch;margin:0}
+.clock{border-left:1px solid var(--line);padding-left:32px}
+.clock .num{font:400 clamp(72px,9vw,120px)/.9 var(--display);color:var(--accent);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.clock .lbl{font-size:14px;color:var(--muted);margin-top:8px;max-width:28ch}
+.clock ul{list-style:none;padding:0;margin:20px 0 0;font-size:13.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px}
+.clock li{display:flex;gap:10px}
+.clock li span{font:500 12px var(--mono);color:var(--muted);min-width:82px;padding-top:2px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.setup{padding:36px}
+.setup h2{font:500 26px/1.2 var(--display);margin:0 0 4px}
+.setup .sub{color:var(--muted);margin:0 0 22px;font-size:14.5px}
+.choices{display:grid;gap:14px}
+.choices.c3{grid-template-columns:repeat(3,1fr)}
+.choices.c2{grid-template-columns:repeat(2,1fr)}
+.choice{position:relative;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:18px 20px;cursor:pointer;transition:border-color .15s, box-shadow .15s, background .15s}
+.choice:hover{border-color:#C9C7C0}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px rgba(122,22,49,.08)}
+.choice h3{margin:0 0 4px;font:600 17px/1.3 var(--body)}
+.choice p{margin:0;font-size:13.5px;color:var(--muted)}
+.choice .meta{display:flex;gap:14px;margin-top:12px;font:500 12px var(--mono);color:var(--ink-2)}
+.choice .tick{position:absolute;top:14px;right:14px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center}
+.choice[aria-pressed="true"] .tick{background:var(--accent);border-color:var(--accent)}
+.choice[aria-pressed="true"] .tick::after{content:"";width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.setup-sep{height:1px;background:var(--line);margin:30px 0}
+.setup-go{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:30px}
+.setup-go .note{font-size:13.5px;color:var(--muted)}
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;padding:56px 0 8px}
+.why h3{font:500 20px/1.25 var(--display);margin:10px 0 6px}
+.why p{margin:0;font-size:14.5px;color:var(--ink-2)}
+.why .n{font:500 12px var(--mono);color:var(--accent)}
+
+/* Profile */
+.page-h{padding:44px 0 24px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.page-h h1{font:400 clamp(32px,4.4vw,46px)/1.08 var(--display);letter-spacing:-.02em;margin:10px 0 6px}
+.page-h p{margin:0;color:var(--muted);max-width:60ch}
+.fields{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px;padding:24px 28px;border-bottom:1px solid var(--line)}
+.field label{display:block;font-weight:600;font-size:13px;margin-bottom:6px;color:var(--ink-2)}
+.field input,.field select{width:100%;font:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);transition:border-color .15s, background .15s}
+.field input:focus,.field select:focus{background:var(--surface);border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(122,22,49,.1)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr}
+.pq{padding:20px 28px;border-bottom:1px solid var(--line-2);display:flex;flex-direction:column;gap:10px}
+.pq:nth-child(odd){border-right:1px solid var(--line-2)}
+.pq .t{font-weight:600;font-size:15px}
+.pq .h{font-size:13px;color:var(--muted);flex:1}
+.yn{display:inline-flex;gap:6px}
+.yn button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 18px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink-2)}
+.yn button:hover{border-color:#C9C7C0}
+.yn button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:#fff}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:20px 28px}
+.foot .note{font-size:14px;color:var(--muted)}
+.foot .note b{color:var(--ink);font:600 18px var(--display)}
+
+/* Assess: focus mode */
+.assess{display:grid;grid-template-columns:240px minmax(0,1fr);gap:48px;padding-top:36px;align-items:start}
+.rail{position:sticky;top:96px;display:flex;flex-direction:column;gap:2px}
+.rail-h{font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px 12px}
+.ra{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;text-align:left;border:0;background:none;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:13.5px;color:var(--ink-2)}
+.ra:hover{background:var(--line-2)}
+.ra[aria-current="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.ra .c{font:500 11.5px var(--mono);color:var(--muted)}
+.ra.full .c{color:var(--good)}
+.ra .pd{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-left:6px}
+.prog{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.prog .track{flex:1;height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.prog .track i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .3s}
+.prog span{font:500 12.5px var(--mono);color:var(--muted);white-space:nowrap}
+.qcard{padding:40px 44px 32px}
+.qtop{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.qarea{font-size:13.5px;color:var(--muted)}
+.qarea b{color:var(--ink);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--line-2);color:var(--ink-2)}
+.chip.sec{font:500 12px var(--mono);background:var(--accent-soft);color:var(--accent)}
+.chip.crit{background:var(--accent);color:#fff}
+.chip.pend{background:var(--gold-soft);color:var(--gold)}
+.qtext{font:400 clamp(24px,2.6vw,31px)/1.3 var(--display);letter-spacing:-.01em;margin:0 0 28px;max-width:40ch}
+.answers{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.ans{position:relative;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:16px 12px 14px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:6px;transition:border-color .15s, background .15s, transform .1s}
+.ans:hover{border-color:#C9C7C0;transform:translateY(-1px)}
+.ans .k{position:absolute;top:10px;right:10px}
+.ans b{font-size:15px}
+.ans small{font-size:12px;color:var(--muted);line-height:1.35}
+.ans .dot{width:10px;height:10px;border-radius:50%}
+.ans[data-v="yes"] .dot{background:var(--good)} .ans[data-v="partly"] .dot{background:var(--warn)} .ans[data-v="no"] .dot{background:var(--bad)} .ans[data-v="unsure"] .dot{background:var(--gold)} .ans[data-v="na"] .dot{background:#B7B5AE}
+.ans[aria-pressed="true"][data-v="yes"]{border-color:var(--good);background:var(--good-soft)}
+.ans[aria-pressed="true"][data-v="partly"]{border-color:var(--warn);background:var(--warn-soft)}
+.ans[aria-pressed="true"][data-v="no"]{border-color:var(--bad);background:var(--bad-soft)}
+.ans[aria-pressed="true"][data-v="unsure"]{border-color:var(--gold);background:var(--gold-soft)}
+.ans[aria-pressed="true"][data-v="na"]{border-color:#9E9C95;background:var(--line-2)}
+.guide{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.guide div{padding:16px 18px}
+.guide div+div{border-left:1px solid var(--line)}
+.guide h4{margin:0 0 4px;font:600 11.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.guide p{margin:0;font-size:14px;color:var(--ink-2)}
+.action{margin-top:14px;padding:14px 18px;border-radius:14px;font-size:14px;display:flex;gap:12px;align-items:flex-start}
+.action.bad{background:var(--bad-soft)} .action.warn{background:var(--warn-soft)}
+.action b{white-space:nowrap}
+.action .eff{font:500 11.5px var(--mono);color:var(--muted);white-space:nowrap;margin-left:auto;padding-top:2px}
+.notes{margin-top:14px}
+.notes summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);list-style:none}
+.notes summary::-webkit-details-marker{display:none}
+.notes summary::before{content:"+ ";color:var(--accent)}
+.notes[open] summary::before{content:"– "}
+textarea{width:100%;min-height:72px;margin-top:8px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);resize:vertical}
+textarea:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.qnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:28px;padding-top:22px;border-top:1px solid var(--line-2);flex-wrap:wrap}
+.qnav .hint{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.auto{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer}
+.pendnote{margin:-6px 0 22px;font-size:13.5px;color:var(--gold);background:var(--gold-soft);padding:10px 14px;border-radius:10px}
+
+/* Overview */
+.ov{padding:8px 0}
+.ovr{display:grid;grid-template-columns:240px minmax(0,1fr) 70px;gap:20px;align-items:center;padding:14px 28px;border-bottom:1px solid var(--line-2)}
+.ovr:last-child{border-bottom:0}
+.ovr .nm{font-weight:600;font-size:14.5px}
+.ovr .nm small{display:block;font:500 11.5px var(--mono);color:var(--muted);font-weight:500}
+.dots{display:flex;flex-wrap:wrap;gap:6px}
+.dots button{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;padding:0}
+.dots button:hover{border-color:var(--ink-2)}
+.dots button[data-a="yes"]{background:var(--good);border-color:var(--good)}
+.dots button[data-a="partly"]{background:var(--warn);border-color:var(--warn)}
+.dots button[data-a="no"]{background:var(--bad);border-color:var(--bad)}
+.dots button[data-a="unsure"]{background:var(--gold);border-color:var(--gold)}
+.dots button[data-a="na"]{background:#CFCDC6;border-color:#CFCDC6}
+.ovr .ct{text-align:right;font:500 12.5px var(--mono);color:var(--muted)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* Results */
+.res-hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:48px;align-items:center;padding:40px 44px}
+.ring{position:relative;width:200px;height:200px}
+.ring svg{width:200px;height:200px;transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .v b{font:400 64px/1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.ring .v b sup{font-size:24px;vertical-align:top;margin-left:2px}
+.ring .v small{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.verdict{font:400 clamp(28px,3.4vw,40px)/1.12 var(--display);letter-spacing:-.015em;margin:12px 0 10px}
+.res-meta{color:var(--muted);font-size:14.5px;margin:0;max-width:62ch}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.03em}
+.pill.good{background:var(--good-soft);color:var(--good)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.none{background:var(--line-2);color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.stat{padding:20px 28px}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat b{display:block;font:400 34px/1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{font-size:13px;color:var(--muted)}
+.sect{margin-top:56px}
+.sect-h{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.sect-h h2{font:400 32px/1.1 var(--display);letter-spacing:-.015em;margin:8px 0 0}
+.sect-h p{margin:6px 0 0;color:var(--muted);font-size:14.5px;max-width:60ch}
+.dom{display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr) 54px 100px;gap:20px;align-items:center;padding:14px 28px;border-bottom:1px solid var(--line-2)}
+.dom:last-child{border-bottom:0}
+.dom .nm{font-weight:600;font-size:14.5px}
+.dom .nm small{display:block;font:500 11.5px var(--mono);color:var(--muted)}
+.bars{height:8px;border-radius:8px;background:var(--line-2);position:relative;overflow:hidden}
+.bars i{position:absolute;left:0;top:0;bottom:0;border-radius:8px}
+.bars .mk{position:absolute;top:0;bottom:0;width:1.5px;background:var(--ink);opacity:.18;left:60%}
+.dom .pc{text-align:right;font:500 20px var(--display);font-variant-numeric:tabular-nums}
+.dom .mt{font-size:12.5px;color:var(--muted);text-align:right}
+.fixes{list-style:none;margin:0;padding:0}
+.fixes li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:16px;padding:18px 28px;border-bottom:1px solid var(--line-2);align-items:start}
+.fixes li:last-child{border-bottom:0}
+.fixes .no{font:400 26px/1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+.fixes button{border:0;background:none;padding:0;text-align:left;cursor:pointer;font:600 15px/1.45 var(--body)}
+.fixes button:hover{color:var(--accent)}
+.fixes small{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.fixes .rf{font:500 12px var(--mono);color:var(--accent);white-space:nowrap;padding-top:3px}
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.col{display:flex;flex-direction:column}
+.col-h{padding:20px 22px 14px;border-bottom:1px solid var(--line-2)}
+.col-h .eyebrow{font-size:11px}
+.col-h h3{margin:8px 0 2px;font:400 24px/1.1 var(--display)}
+.col-h span{font-size:13px;color:var(--muted)}
+.col ul{list-style:none;margin:0;padding:8px 0;flex:1}
+.col li{padding:10px 22px;font-size:14px;line-height:1.45}
+.col li small{display:block;font:500 11.5px var(--mono);color:var(--muted);margin-top:3px}
+.col .more{margin:0 22px 18px;align-self:flex-start}
+.exports{display:flex;gap:10px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;z-index:20}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(22,24,28,.35);display:grid;place-items:center;padding:20px;z-index:30}
+.modal .panel{width:min(720px,100%);padding:24px}
+.modal textarea{min-height:320px;font:12.5px/1.5 var(--mono)}
+.banner{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:24px;padding:12px 18px;border-radius:14px;background:var(--gold-soft);font-size:14px}
+footer{border-top:1px solid var(--line);padding:32px 0 48px;font-size:13.5px;color:var(--muted);margin-top:24px}
+footer .cols{display:grid;grid-template-columns:1.3fr 1fr;gap:40px}
+footer h4{margin:0 0 8px;color:var(--ink);font-size:14px}
+footer ul{margin:0;padding-left:18px}
+footer p{margin:0 0 10px}
+
+@media (max-width:1000px){
+  .hero{grid-template-columns:1fr;gap:32px;padding-top:44px}
+  .clock{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:24px}
+  .assess{grid-template-columns:1fr;gap:20px}
+  .rail{position:static;flex-direction:row;overflow-x:auto;padding-bottom:4px}
+  .rail-h{display:none}
+  .ra{min-width:max-content;background:var(--surface);border:1px solid var(--line)}
+  .answers{grid-template-columns:repeat(3,1fr)}
+  .road{grid-template-columns:1fr}
+  .res-hero{grid-template-columns:1fr;gap:24px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat:nth-child(3){border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+  .why{grid-template-columns:1fr;gap:24px}
+  footer .cols{grid-template-columns:1fr}
+  .days{display:none}
+}
+@media (max-width:720px){
+  .wrap{padding:0 16px}
+  .crumbs .crumb span{display:none}
+  .choices.c3,.choices.c2{grid-template-columns:1fr}
+  .setup{padding:24px 20px}
+  .fields{grid-template-columns:1fr;padding:20px}
+  .pgrid{grid-template-columns:1fr}
+  .pq{padding:18px 20px}
+  .pq:nth-child(odd){border-right:0}
+  .qcard{padding:28px 20px 22px}
+  .answers{grid-template-columns:1fr 1fr}
+  .ans .k{display:none}
+  .guide{grid-template-columns:1fr}
+  .guide div+div{border-left:0;border-top:1px solid var(--line)}
+  .ovr{grid-template-columns:1fr auto;padding:14px 20px;gap:10px}
+  .ovr .dots{grid-column:1/-1}
+  .dom{grid-template-columns:1fr 54px;padding:14px 20px;gap:8px 12px}
+  .dom .bars{grid-column:1/-1;grid-row:2}
+  .dom .mt{display:none}
+  .res-hero{padding:28px 20px}
+  .stat{padding:16px 20px}
+  .fixes li{padding:16px 20px;grid-template-columns:30px minmax(0,1fr)}
+  .fixes .rf{grid-column:2}
+  .qnav .hint{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <button class="brand" id="home" aria-label="Home"><span class="seal">PD</span><b>PDPA Readiness <i>Check</i></b></button>
+    <nav class="crumbs" aria-label="Steps">
+      <button class="crumb" data-go="profile">1<span>&nbsp;· Profile</span></button>
+      <button class="crumb" data-go="assess">2<span>&nbsp;· Assessment</span></button>
+      <button class="crumb" data-go="overview">3<span>&nbsp;· Review</span></button>
+      <button class="crumb" data-go="results">4<span>&nbsp;· Results</span></button>
+    </nav>
+    <span class="days" id="days"></span>
+  </div>
+</header>
+<div class="wrap"><div id="banner"></div><main id="app"></main></div>
+<footer>
+  <div class="wrap cols">
+    <div>
+      <h4>About this check</h4>
+      <p style="color:var(--ink)">Built by <a href="https://github.com/SasinduMethsukha">Sasindu Methsukha</a>, cybersecurity undergraduate at SLIIT. Last checked against the Act and the 2025 amendment on 18 November 2026.</p>
+      <p>Every question maps to a section of the Personal Data Protection Act, No. 9 of 2022, as amended by Act No. 22 of 2025. Yes = 1, Partly = 0.5, No and Not sure = 0. N/A is excluded. Items are weighted 3 (critical), 2 (important) or 1 (good practice). The headline score covers obligations in force from 1 January 2027 (Parts I and III). Parts II and IV are scored separately.</p>
+      <p>This is a self-assessment aid, not legal advice. The DPA is still issuing rules and guidelines; the 72-hour breach target comes from its draft rules. Answers stay in your browser and are never sent anywhere.</p>
+    </div>
+    <div>
+      <h4>Sources</h4>
+      <ul>
+        <li><a href="https://documents.gov.lk/view/acts/2022/3/09-2022_E.pdf">Personal Data Protection Act, No. 9 of 2022</a></li>
+        <li><a href="https://dpa.gov.lk/acts/22-2025_E_251104_201549.pdf">Amendment Act, No. 22 of 2025</a></li>
+        <li><a href="https://www.ft.lk/front-page/Data-protection-compliance-regime-takes-effect-on-1-Jan-2027/44-795776">Gazette No. 2498/16 commencement (Daily FT)</a></li>
+        <li><a href="https://dpa.gov.lk/media/DPA_Circular_012026_E.pdf">DPA Circular 01/2026</a></li>
+        <li><a href="https://dpa.gov.lk/guidelines.php">DPA draft rules and guidelines</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal hidden" id="modal">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <h3 id="mtitle" style="margin:0 0 6px;font:500 22px var(--display)">Copy your report</h3>
+    <p style="margin:0 0 6px;color:var(--muted);font-size:14px">Your browser blocked automatic copying. The text below is selected: press Ctrl+C or ⌘C.</p>
+    <textarea id="mtext" aria-label="Report text"></textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" id="mclose">Close</button></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+const KEY="pdpa-check-v3";
+const VAL={yes:1,partly:.5,no:0,unsure:0};
+const ANS=[["yes","Yes","Fully in place"],["partly","Partly","Started or informal"],["no","No","Not in place"],["unsure","Not sure","Needs checking"],["na","N/A","Doesn't apply"]];
+const LBL=Object.fromEntries(ANS.map(a=>[a[0],a[1]]));
+const WLBL={3:"Critical",2:"Important",1:"Good practice"};
+const ELBL={L:"Low effort",M:"Medium effort",H:"High effort"};
+const ORGS=[["private","Private sector","Companies, SMEs, startups and professional services"],["public","Public authority","Ministries, departments, Provincial Councils and local authorities"],["other","NGO or other","Non-profits, schools, clinics, associations and mixed operations"]];
+const SECTORS=["Events and media","Retail and e-commerce","Hospitality and tourism","Education","Healthcare","IT and software","Professional services","Manufacturing","Finance (non-bank)","Government","NGO or non-profit","Other"];
+const SIZES=["1–10 people","11–50 people","51–250 people","250+ people"];
+const dById=Object.fromEntries(DOMAINS.map(d=>[d.id,d]));
+const qById=Object.fromEntries(QUESTIONS.map(q=>[q.id,q]));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+let S;
+const blank=()=>({orgType:"private",mode:"quick",org:"",sector:"",size:"",profile:{},answers:{},notes:{},example:false,view:"home",cur:null,auto:true,started:false});
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return ((h>>>0)%1000)/1000;}
+function example(){
+  const s=blank();
+  Object.assign(s,{org:"Example: Colombo event studio",sector:"Events and media",size:"1–10 people",example:true,mode:"full",started:true,view:"results"});
+  s.profile={staff:"yes",special:"yes",children:"yes",vendors:"yes",processor:"yes",overseas:"yes",marketing:"yes",monitoring:"no",profiling:"no",website:"yes"};
+  const base={gov:.15,inv:.25,law:.3,pur:.3,trn:.15,sec:.55,ven:.2,prc:.35,xbt:.1,bre:.15,dpi:.15,rgt:.15,mkt:.3};
+  QUESTIONS.forEach(q=>{const h=hash(q.id),b=base[q.d];s.answers[q.id]=h<b?"yes":h<b+.3?"partly":h<b+.4?"unsure":"no";});
+  s.answers.gov4="na";
+  return s;
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=Object.assign(blank(),JSON.parse(r));if(S.example)S=blank();return;}}catch(e){}S=blank();}
+function save(){if(S.example)return;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+// ---------- logic ----------
+function on(k){if(k==="public")return S.orgType==="public";return S.profile[k]!=="no";}
+function domainOn(d){return !d.cond||d.cond.some(on);}
+function applies(q){if(!domainOn(dById[q.d]))return false;if(q.c&&!q.c.some(on))return false;return S.mode==="full"||QUICK.has(q.id);}
+function phase(q){return q.p||dById[q.d].phase||"2027";}
+function activeQs(){const qs=QUESTIONS.filter(applies);const order=DOMAINS.map(d=>d.id);return qs.sort((a,b)=>order.indexOf(a.d)-order.indexOf(b.d));}
+function score(list){let t=0,m=0;list.forEach(q=>{const a=S.answers[q.id];if(!a||a==="na")return;t+=q.w*VAL[a];m+=q.w;});return m?Math.round(t/m*100):null;}
+function band(p){
+  if(p===null)return{t:"Not started",c:"none",v:"Answer the questions to see where you stand."};
+  if(p>=85)return{t:"Ready",c:"good",v:"Largely ready for 1 January 2027."};
+  if(p>=60)return{t:"Nearly ready",c:"good",v:"Nearly ready, with a few specific gaps to close."};
+  if(p>=35)return{t:"Partially ready",c:"warn",v:"Partially ready. Important gaps remain."};
+  return{t:"Not ready",c:"bad",v:"Not ready yet. Start with the critical items."};
+}
+function maturity(p){if(p===null)return"–";if(p<25)return"Initial";if(p<50)return"Developing";if(p<75)return"Defined";if(p<90)return"Managed";return"Optimised";}
+const BCOL={good:"var(--good)",warn:"var(--warn)",bad:"var(--bad)",none:"var(--line)"};
+function gaps(){return activeQs().filter(q=>["no","partly","unsure"].includes(S.answers[q.id])).map(q=>{const a=S.answers[q.id];return{q,a,pri:q.w*(a==="partly"?.5:1)*(phase(q)==="pending"?.7:1)+(q.e==="L"?.2:0)};}).sort((x,y)=>y.pri-x.pri);}
+function bucket(g){const p=phase(g.q)==="pending";if(g.q.w===3&&!p&&g.q.e!=="H")return"now";if(g.q.w===3||(g.q.w===2&&!p))return"next";if(g.q.w===2&&p&&g.q.e==="L")return"next";return"later";}
+function counts(){const a=activeQs();return{total:a.length,done:a.filter(q=>S.answers[q.id]).length};}
+function mins(n){return Math.max(5,Math.round(n*.35/5)*5);}
+
+// ---------- shell ----------
+const app=document.getElementById("app");
+function go(v){S.view=v;save();render();window.scrollTo({top:0});try{history.replaceState(null,"","#"+v);}catch(e){}}
+function render(){
+  document.querySelectorAll(".crumb").forEach(b=>{b.setAttribute("aria-current",b.dataset.go===S.view?"page":"false");b.disabled=!S.started&&b.dataset.go!=="profile";});
+  document.getElementById("banner").innerHTML=S.example?`<div class="banner"><span>You're viewing an <b>example report</b> for a 6-person event production company in Colombo.</span><button class="btn sm" id="exitEx">Start my own assessment</button></div>`:"";
+  const ex=document.getElementById("exitEx");if(ex)ex.addEventListener("click",()=>{S=blank();go("home");});
+  ({home:renderHome,profile:renderProfile,assess:renderAssess,overview:renderOverview,results:renderResults})[S.view]();
+}
+
+// ---------- home ----------
+function renderHome(){
+  const qn=m=>{const keep=S.mode;S.mode=m;const n=activeQs().length;S.mode=keep;return n;};
+  const nq=qn("quick"),nf=qn("full");
+  const d=daysLeft();
+  const c=counts();
+  const resume=S.started&&c.done>0;
+  app.innerHTML=`
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Sri Lanka · Personal Data Protection Act</span>
+      <h1>Is your organisation <em>ready</em> for the PDPA?</h1>
+      <p class="lede">A free self-assessment built on the text of Act No. 9 of 2022 and the 2025 amendment. Every question cites its section. You finish with a score, your critical gaps, and a 30/60/90-day plan.</p>
+    </div>
+    <div class="clock">
+      <div class="num">${d>0?d:"0"}</div>
+      <div class="lbl">${d>0?"days until Parts I and III of the Act come into force on 1 January 2027.":"Parts I and III have been in force since 1 January 2027."}</div>
+      <ul><li><span>1 Jan 2027</span>Processing rules (s5–s12), DPO, breaches, DPIA, processors, transfers (s20–s26)</li><li><span>To be set</span>Data subject rights (Part II) and direct marketing (Part IV)</li></ul>
+    </div>
+  </section>
+  <section class="panel setup" aria-labelledby="setup-h">
+    <h2 id="setup-h">What type of organisation are you?</h2>
+    <p class="sub">Public authorities have extra duties, such as a mandatory DPO and transfer restrictions.</p>
+    <div class="choices c3">${ORGS.map(o=>`<button class="choice" data-org="${o[0]}" aria-pressed="${S.orgType===o[0]}"><span class="tick"></span><h3>${o[1]}</h3><p>${o[2]}</p></button>`).join("")}</div>
+    <div class="setup-sep"></div>
+    <h2>How deep do you want to go?</h2>
+    <p class="sub">You can switch to the full audit later without losing answers.</p>
+    <div class="choices c2">
+      <button class="choice" data-mode="quick" aria-pressed="${S.mode==="quick"}"><span class="tick"></span><h3>Quick check</h3><p>The critical obligations only. Best for a first look or a management briefing.</p><div class="meta"><span>up to ${nq} questions</span><span>~10 min</span></div></button>
+      <button class="choice" data-mode="full" aria-pressed="${S.mode==="full"}"><span class="tick"></span><h3>Full audit</h3><p>Every obligation in Parts I to IV, with evidence prompts. Best for a compliance programme or a consultant.</p><div class="meta"><span>up to ${nf} questions</span><span>~${mins(nf)} min</span></div></button>
+    </div>
+    <div class="setup-go">
+      <span class="note">${resume?`You have ${c.done} answers saved in this browser.`:"Nothing is uploaded. Your answers stay in this browser."}</span>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="seeEx">See an example report</button>
+        <button class="btn primary lg" id="begin">${resume?"Continue assessment →":"Start →"}</button>
+      </div>
+    </div>
+  </section>
+  <section class="why">
+    <div><span class="n">01</span><h3>Cites the Act, line by line</h3><p>Each question shows the section it tests, such as s10 for security or s26(2) for transfers, so you can check the source yourself.</p></div>
+    <div><span class="n">02</span><h3>Fits your organisation</h3><p>A short profile switches off what doesn't apply. No CCTV questions if you don't run CCTV, no marketing questions if you don't send promotions.</p></div>
+    <div><span class="n">03</span><h3>Ends with a plan</h3><p>Gaps are ranked by legal weight and effort into Now, Next and Later, ready to paste into a spreadsheet with owners and dates.</p></div>
+  </section>`;
+  app.querySelectorAll("[data-org]").forEach(b=>b.addEventListener("click",()=>{S.orgType=b.dataset.org;save();renderHome();document.querySelector(`[data-org="${S.orgType}"]`).focus();}));
+  app.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{S.mode=b.dataset.mode;save();renderHome();document.querySelector(`[data-mode="${S.mode}"]`).focus();}));
+  document.getElementById("seeEx").addEventListener("click",()=>{S=example();render();window.scrollTo({top:0});});
+  document.getElementById("begin").addEventListener("click",()=>{S.started=true;go(resume?"assess":"profile");});
+}
+
+// ---------- profile ----------
+function renderProfile(){
+  const opt=(arr,v)=>`<option value="">Select…</option>`+arr.map(x=>`<option ${x===v?"selected":""}>${esc(x)}</option>`).join("");
+  const n=activeQs().length;
+  app.innerHTML=`
+  <div class="page-h"><div><span class="eyebrow">Step 1 of 4</span><h1>Your organisation</h1><p>These answers decide which questions you'll see. If you're not sure, choose Yes; you can mark single questions N/A later.</p></div></div>
+  <div class="panel">
+    <div class="fields">
+      <div class="field"><label for="org">Organisation name</label><input id="org" value="${esc(S.org)}" placeholder="e.g. Lanka Events (Pvt) Ltd" autocomplete="organization"></div>
+      <div class="field"><label for="sector">Sector</label><select id="sector">${opt(SECTORS,S.sector)}</select></div>
+      <div class="field"><label for="size">Size</label><select id="size">${opt(SIZES,S.size)}</select></div>
+    </div>
+    <div class="pgrid">${PROFILE.map(p=>`<div class="pq"><div class="t" id="pt-${p.k}">${esc(p.t)}</div><div class="h">${esc(p.h)}</div>
+      <div class="yn" role="group" aria-labelledby="pt-${p.k}">${["yes","no"].map(v=>`<button data-p="${p.k}" data-v="${v}" aria-pressed="${S.profile[p.k]===v}">${v==="yes"?"Yes":"No"}</button>`).join("")}</div></div>`).join("")}</div>
+    <div class="foot" style="border-top:1px solid var(--line)"><span class="note"><b id="nq">${n}</b> questions in your ${S.mode==="quick"?"quick check":"full audit"}</span><button class="btn primary lg" id="next">Begin questions →</button></div>
+  </div>`;
+  document.getElementById("org").addEventListener("input",e=>{S.org=e.target.value;save();});
+  document.getElementById("sector").addEventListener("change",e=>{S.sector=e.target.value;save();});
+  document.getElementById("size").addEventListener("change",e=>{S.size=e.target.value;save();});
+  app.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{
+    S.profile[b.dataset.p]=b.dataset.v;save();
+    app.querySelectorAll(`[data-p="${b.dataset.p}"]`).forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v===b.dataset.v)));
+    document.getElementById("nq").textContent=activeQs().length;
+  }));
+  document.getElementById("next").addEventListener("click",()=>{S.started=true;const qs=activeQs();S.cur=(qs.find(q=>!S.answers[q.id])||qs[0]).id;go("assess");});
+}
+
+// ---------- assess (focus) ----------
+function curQ(){const qs=activeQs();let q=qs.find(x=>x.id===S.cur);if(!q){q=qs.find(x=>!S.answers[x.id])||qs[0];S.cur=q.id;}return{q,qs,i:qs.indexOf(q)};}
+function renderAssess(){
+  const {q,qs,i}=curQ();const d=dById[q.d];const a=S.answers[q.id];
+  const c=counts();
+  const doms=DOMAINS.filter(x=>qs.some(y=>y.d===x.id));
+  const pend=phase(q)==="pending";
+  const fix=["no","partly","unsure"].includes(a)?`<div class="action ${a==="partly"?"warn":"bad"}"><b>Action</b><span>${esc(q.f)}</span><span class="eff">${ELBL[q.e]}</span></div>`:"";
+  app.innerHTML=`
+  <div class="assess">
+    <nav class="rail" aria-label="Areas">
+      <p class="rail-h">Areas</p>
+      ${doms.map(x=>{const xs=qs.filter(y=>y.d===x.id);const dn=xs.filter(y=>S.answers[y.id]).length;return `<button class="ra ${dn===xs.length?"full":""}" data-area="${x.id}" aria-current="${x.id===d.id}"><span>${esc(x.name)}${x.phase==="pending"?'<span class="pd">Pending</span>':""}</span><span class="c">${dn}/${xs.length}</span></button>`;}).join("")}
+    </nav>
+    <section>
+      <div class="prog"><div class="track"><i style="width:${c.total?c.done/c.total*100:0}%"></i></div><span>${c.done} of ${c.total} answered</span></div>
+      <article class="panel qcard" aria-labelledby="qtext">
+        <div class="qtop">
+          <span class="qarea"><b>${esc(d.name)}</b> · Question ${i+1} of ${qs.length}</span>
+          <span class="chips"><span class="chip sec">${esc(q.s)}</span>${q.w===3?'<span class="chip crit">Critical</span>':`<span class="chip">${WLBL[q.w]}</span>`}${pend?'<span class="chip pend">Not yet in force</span>':""}</span>
+        </div>
+        ${pend?`<p class="pendnote">This obligation sits in a Part of the Act that has no commencement date yet. It's scored separately from your headline score.</p>`:""}
+        <h1 class="qtext" id="qtext">${esc(q.t)}</h1>
+        <div class="answers" role="group" aria-labelledby="qtext">${ANS.map((x,k)=>`<button class="ans" data-v="${x[0]}" aria-pressed="${a===x[0]}"><span class="kbd k">${k+1}</span><span class="dot"></span><b>${x[1]}</b><small>${x[2]}</small></button>`).join("")}</div>
+        <div class="guide"><div><h4>What good looks like</h4><p>${esc(q.g)}</p></div><div><h4>Evidence to keep</h4><p>${esc(q.ev)}</p></div></div>
+        ${fix}
+        <details class="notes" ${S.notes[q.id]?"open":""}><summary>Add a note for your report</summary><textarea id="note" placeholder="e.g. Policy drafted, waiting for director sign-off">${esc(S.notes[q.id]||"")}</textarea></details>
+        <div class="qnav">
+          <button class="btn" id="prev" ${i===0?"disabled":""}>← Back</button>
+          <span class="hint"><span class="kbd">1</span>–<span class="kbd">5</span> answer · <span class="kbd">←</span><span class="kbd">→</span> move</span>
+          <label class="auto"><input type="checkbox" id="auto" ${S.auto?"checked":""}> Auto-advance</label>
+          ${i<qs.length-1?`<button class="btn primary" id="nextq">Next →</button>`:`<button class="btn primary" id="finish">Review answers →</button>`}
+        </div>
+      </article>
+    </section>
+  </div>`;
+  app.querySelectorAll(".ans").forEach(b=>b.addEventListener("click",()=>answer(b.dataset.v)));
+  app.querySelectorAll("[data-area]").forEach(b=>b.addEventListener("click",()=>{const xs=qs.filter(y=>y.d===b.dataset.area);S.cur=(xs.find(y=>!S.answers[y.id])||xs[0]).id;save();renderAssess();}));
+  document.getElementById("prev").addEventListener("click",()=>move(-1));
+  const nx=document.getElementById("nextq");if(nx)nx.addEventListener("click",()=>move(1));
+  const fi=document.getElementById("finish");if(fi)fi.addEventListener("click",()=>go("overview"));
+  document.getElementById("auto").addEventListener("change",e=>{S.auto=e.target.checked;save();});
+  document.getElementById("note").addEventListener("input",e=>{const v=e.target.value;if(v.trim())S.notes[q.id]=v;else delete S.notes[q.id];save();});
+}
+let advT;
+function answer(v){
+  const {q,qs,i}=curQ();S.answers[q.id]=v;save();
+  clearTimeout(advT);
+  renderAssess();
+  const btn=app.querySelector(`.ans[data-v="${v}"]`);if(btn)btn.focus({preventScroll:true});
+  if(S.auto&&(v==="yes"||v==="na")){advT=setTimeout(()=>{if(i<qs.length-1)move(1);else go("overview");},380);}
+}
+function move(dir){const {qs,i}=curQ();const j=Math.min(qs.length-1,Math.max(0,i+dir));S.cur=qs[j].id;save();renderAssess();const t=app.querySelector(".qcard");if(t&&t.getBoundingClientRect().top<70)t.scrollIntoView({block:"start"});}
+document.addEventListener("keydown",e=>{
+  if(S.view!=="assess")return;
+  const tag=(e.target.tagName||"").toLowerCase();if(tag==="textarea"||tag==="input"||tag==="select"||e.metaKey||e.ctrlKey||e.altKey)return;
+  if(/^[1-5]$/.test(e.key)){e.preventDefault();answer(ANS[+e.key-1][0]);}
+  else if(e.key==="ArrowRight"){e.preventDefault();const {qs,i}=curQ();if(i<qs.length-1)move(1);else go("overview");}
+  else if(e.key==="ArrowLeft"){e.preventDefault();move(-1);}
+});
+
+// ---------- overview ----------
+function renderOverview(){
+  const qs=activeQs();const c=counts();
+  const doms=DOMAINS.filter(x=>qs.some(y=>y.d===x.id));
+  app.innerHTML=`
+  <div class="page-h"><div><span class="eyebrow">Step 3 of 4</span><h1>Review your answers</h1><p>Each square is one question. Select a square to open it. Empty squares are unanswered.</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">${S.mode==="quick"?`<button class="btn" id="toFull">Switch to full audit</button>`:""}<button class="btn primary lg" id="toRes">See results →</button></div></div>
+  <div class="panel">
+    <div style="padding:16px 28px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center">
+      <span style="font-weight:600">${c.done} of ${c.total} answered</span>
+      <span class="legend">${ANS.map(a=>`<span><i style="background:${{yes:"var(--good)",partly:"var(--warn)",no:"var(--bad)",unsure:"var(--gold)",na:"#CFCDC6"}[a[0]]}"></i>${a[1]}</span>`).join("")}<span><i style="border:1.5px solid var(--line)"></i>Unanswered</span></span>
+    </div>
+    <div class="ov">${doms.map(x=>{const xs=qs.filter(y=>y.d===x.id);const dn=xs.filter(y=>S.answers[y.id]).length;
+      return `<div class="ovr"><span class="nm">${esc(x.name)}<small>${esc(x.refs)}</small></span><span class="dots">${xs.map(y=>`<button data-q="${y.id}" data-a="${S.answers[y.id]||""}" title="${esc(y.s+": "+y.t)}" aria-label="${esc(y.t)}, ${S.answers[y.id]?LBL[S.answers[y.id]]:"unanswered"}"></button>`).join("")}</span><span class="ct">${dn}/${xs.length}</span></div>`;}).join("")}</div>
+  </div>`;
+  app.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{S.cur=b.dataset.q;go("assess");}));
+  document.getElementById("toRes").addEventListener("click",()=>go("results"));
+  const tf=document.getElementById("toFull");if(tf)tf.addEventListener("click",()=>{S.mode="full";save();renderOverview();toast(`Full audit on: ${activeQs().length} questions.`);});
+}
+
+// ---------- results ----------
+function renderResults(){
+  const all=activeQs();
+  const now=all.filter(q=>phase(q)==="2027"),pend=all.filter(q=>phase(q)==="pending");
+  const p=score(now),pp=score(pend),b=band(p),c=counts(),G=gaps();
+  const crit=G.filter(g=>g.q.w===3&&g.a!=="partly");
+  const unsure=all.filter(q=>S.answers[q.id]==="unsure").length;
+  const quick=G.filter(g=>g.q.e==="L").length;
+  const doms=DOMAINS.filter(x=>all.some(y=>y.d===x.id)).map(d=>{const xs=all.filter(q=>q.d===d.id);return{d,p:score(xs),n:xs.length,a:xs.filter(q=>S.answers[q.id]).length};});
+  const B={now:[],next:[],later:[]};G.forEach(g=>B[bucket(g)].push(g));
+  const C=2*Math.PI*86;const off=C*(1-(p??0)/100);
+  const orgL=ORGS.find(o=>o[0]===S.orgType)[1];
+  const col=(k,eb,title,sub)=>{const L=B[k];const lim=S["exp_"+k]?L.length:5;return `<div class="panel col"><div class="col-h"><span class="eyebrow">${eb}</span><h3>${title}</h3><span>${sub} · ${L.length} action${L.length===1?"":"s"}</span></div>
+    <ul>${L.slice(0,lim).map(g=>`<li>${esc(g.q.f)}<small>${esc(g.q.s)} · ${WLBL[g.q.w]} · ${ELBL[g.q.e]}</small></li>`).join("")||'<li style="color:var(--muted)">Nothing here.</li>'}</ul>
+    ${L.length>5?`<button class="btn sm more" data-exp="${k}">${S["exp_"+k]?"Show fewer":"Show all "+L.length}</button>`:""}</div>`;};
+  app.innerHTML=`
+  <div class="page-h"><div><span class="eyebrow">Step 4 of 4 · ${esc(orgL)} · ${S.mode==="quick"?"Quick check":"Full audit"}</span><h1>${esc(S.org||"Your organisation")}</h1></div>
+    <div class="exports"><button class="btn" id="cpCsv">Copy action plan (CSV)</button><button class="btn primary" id="cpRep">Copy full report</button></div></div>
+  <div class="panel">
+    <div class="res-hero">
+      <div class="ring" role="img" aria-label="Readiness ${p??0} percent">
+        <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="86" fill="none" stroke="var(--line-2)" stroke-width="12"/>
+        <circle cx="100" cy="100" r="86" fill="none" stroke="${BCOL[b.c]}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/></svg>
+        <div class="v"><div><b>${p??"–"}${p===null?"":"<sup>%</sup>"}</b><small>in-force readiness</small></div></div>
+      </div>
+      <div>
+        <span class="pill ${b.c}">${b.t}</span>
+        <p class="verdict">${esc(b.v)}</p>
+        <p class="res-meta">This score covers the obligations in force from 1 January 2027 (Parts I and III). Parts II and IV, which have no commencement date yet, score <b>${pp===null?"–":pp+"%"}</b>.${c.done<c.total?` <b>${c.total-c.done} questions are unanswered</b>. <button class="btn link" id="toAssess" style="padding:0">Finish them</button> for an accurate score.`:""}</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>${c.done}<span style="font-size:20px;color:var(--muted)">/${c.total}</span></b><span>Questions answered</span></div>
+      <div class="stat"><b style="color:var(--bad)">${crit.length}</b><span>Critical gaps</span></div>
+      <div class="stat"><b>${quick}</b><span>Quick wins (low effort)</span></div>
+      <div class="stat"><b style="color:var(--gold)">${unsure}</b><span>To check ("Not sure")</span></div>
+    </div>
+  </div>
+
+  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Readiness by area</span><h2>Where you stand</h2><p>Maturity runs Initial → Developing → Defined → Managed → Optimised. The faint line marks 60%.</p></div></div>
+    <div class="panel">${doms.map(x=>{const bb=band(x.p);return `<div class="dom"><span class="nm">${esc(x.d.name)}<small>${esc(x.d.refs)}${x.d.phase==="pending"?" · not yet in force":""}</small></span><span class="bars"><i style="width:${x.p??0}%;background:${BCOL[bb.c]}"></i><span class="mk"></span></span><span class="pc">${x.p===null?"–":x.p+"%"}</span><span class="mt">${maturity(x.p)}${x.a<x.n?` · ${x.n-x.a} open`:""}</span></div>`;}).join("")}</div>
+  </section>
+
+  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Critical gaps</span><h2>Fix these first</h2><p>Critical obligations you answered No or Not sure, in priority order. Select one to revisit it.</p></div></div>
+    <div class="panel"><ol class="fixes">${crit.length?crit.slice(0,10).map((g,i)=>`<li><span class="no">${String(i+1).padStart(2,"0")}</span><span><button data-jump="${g.q.id}">${esc(g.q.f)}</button><small>${esc(g.q.t)}</small></span><span class="rf">${esc(g.q.s)}</span></li>`).join(""):`<li><span></span><span>No critical gaps in your answers.</span><span></span></li>`}</ol></div>
+  </section>
+
+  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Roadmap</span><h2>Your 30/60/90-day plan</h2><p>In-force critical items come first, then important items. Obligations from Parts II and IV follow.</p></div></div>
+    <div class="road">${col("now","0–30 days","Now","Critical, in force")}${col("next","30–90 days","Next","Important")}${col("later","90+ days","Later","Good practice")}</div>
+  </section>
+
+  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Keep a record</span><h2>Export and evidence</h2><p>Keep the report as evidence of your periodic review under s12(g). The CSV comes with Owner, Due date and Status columns.</p></div></div>
+    <div class="exports"><button class="btn primary" id="cpRep2">Copy full report (Markdown)</button><button class="btn" id="cpCsv2">Copy action plan (CSV)</button><button class="btn" id="reset">Start over</button></div>
+  </section>`;
+  const ta=document.getElementById("toAssess");if(ta)ta.addEventListener("click",()=>{const u=all.find(q=>!S.answers[q.id]);if(u)S.cur=u.id;go("assess");});
+  app.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>{S.cur=b.dataset.jump;if(S.example){toast("This is the example report. Start your own to edit answers.");return;}go("assess");}));
+  app.querySelectorAll("[data-exp]").forEach(b=>b.addEventListener("click",()=>{S["exp_"+b.dataset.exp]=!S["exp_"+b.dataset.exp];renderResults();}));
+  ["cpRep","cpRep2"].forEach(id=>document.getElementById(id).addEventListener("click",()=>copy(report(),"Report copied. Paste it into a doc or email.")));
+  ["cpCsv","cpCsv2"].forEach(id=>document.getElementById(id).addEventListener("click",()=>copy(csv(),"Action plan copied. Paste it into Google Sheets or Excel.")));
+  document.getElementById("reset").addEventListener("click",e=>{const btn=e.currentTarget;
+    if(btn.dataset.c){S=blank();try{localStorage.removeItem(KEY);}catch(err){}go("home");toast("All answers cleared.");}
+    else{btn.dataset.c="1";btn.textContent="Click again to erase all answers";setTimeout(()=>{if(btn.isConnected){delete btn.dataset.c;btn.textContent="Start over";}},4000);}});
+}
+
+// ---------- export ----------
+function report(){
+  const all=activeQs(),now=all.filter(q=>phase(q)==="2027"),pend=all.filter(q=>phase(q)==="pending");
+  const p=score(now),pp=score(pend),b=band(p),c=counts(),G=gaps();
+  const L=[];
+  L.push(`# PDPA Readiness Report: ${S.org||"Organisation"}`);
+  L.push(`Date: ${new Date().toISOString().slice(0,10)}  `);
+  L.push(`Organisation type: ${ORGS.find(o=>o[0]===S.orgType)[1]}${S.sector?` · ${S.sector}`:""}${S.size?` · ${S.size}`:""}  `);
+  L.push(`Assessment: ${S.mode==="quick"?"Quick check":"Full audit"} · Basis: Personal Data Protection Act, No. 9 of 2022, as amended by Act No. 22 of 2025`);
+  L.push("");
+  L.push(`## Summary`);
+  L.push(`- In-force readiness (Parts I and III, from 1 Jan 2027): **${p===null?"n/a":p+"%"} (${b.t})**`);
+  L.push(`- Parts II and IV (not yet in force): ${pp===null?"n/a":pp+"%"}`);
+  L.push(`- Answered: ${c.done}/${c.total} · Critical gaps: ${G.filter(g=>g.q.w===3&&g.a!=="partly").length}`);
+  L.push("");
+  L.push(`## Readiness by area`);L.push(`| Area | Sections | Score | Maturity |`);L.push(`|---|---|---|---|`);
+  DOMAINS.filter(d=>all.some(q=>q.d===d.id)).forEach(d=>{const s=score(all.filter(q=>q.d===d.id));L.push(`| ${d.name} | ${d.refs} | ${s===null?"n/a":s+"%"} | ${maturity(s)} |`);});
+  L.push("");
+  const names={now:"Now (0–30 days)",next:"Next (30–90 days)",later:"Later (90+ days)"};
+  L.push(`## Action plan`);
+  ["now","next","later"].forEach(k=>{const xs=G.filter(g=>bucket(g)===k);if(!xs.length)return;L.push(`### ${names[k]}`);
+    xs.forEach((g,i)=>{L.push(`${i+1}. **${g.q.f}**  `);L.push(`   ${g.q.s} · ${WLBL[g.q.w]} · ${ELBL[g.q.e]} · answer: ${LBL[g.a]}${phase(g.q)==="pending"?" · not yet in force":""}  `);if(S.notes[g.q.id])L.push(`   Note: ${S.notes[g.q.id].replace(/\n/g," ")}`);});L.push("");});
+  L.push(`## All answers`);
+  DOMAINS.filter(d=>all.some(q=>q.d===d.id)).forEach(d=>{L.push(`### ${d.name}`);all.filter(q=>q.d===d.id).forEach(q=>L.push(`- [${LBL[S.answers[q.id]]||"Unanswered"}] ${q.t} (${q.s})${S.notes[q.id]?` | Note: ${S.notes[q.id].replace(/\n/g," ")}`:""}`));L.push("");});
+  L.push(`_Self-assessment only, not legal advice. Check dpa.gov.lk for current rules, directives and guidelines._`);
+  return L.join("\n");
+}
+function csv(){
+  const qt=s=>`"${String(s).replace(/"/g,'""')}"`;
+  const names={now:"Now (0-30 days)",next:"Next (30-90 days)",later:"Later (90+ days)"};
+  const rows=[["Phase","Action","Section","Priority","Effort","Current answer","Area","Applies from","Owner","Due date","Status","Notes"]];
+  gaps().forEach(g=>rows.push([names[bucket(g)],g.q.f,g.q.s,WLBL[g.q.w],ELBL[g.q.e],LBL[g.a],dById[g.q.d].name,phase(g.q)==="pending"?"Date to be gazetted":"1 Jan 2027","","","Open",S.notes[g.q.id]||""]));
+  return rows.map(r=>r.map(qt).join(",")).join("\n");
+}
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg);}catch(e){const m=document.getElementById("modal"),t=document.getElementById("mtext");t.value=text;m.classList.remove("hidden");t.focus();t.select();}}
+document.getElementById("mclose").addEventListener("click",()=>document.getElementById("modal").classList.add("hidden"));
+document.getElementById("modal").addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("modal").classList.add("hidden");});
+let tt;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2600);}
+function daysLeft(){return Math.ceil((new Date("2027-01-01T00:00:00+05:30")-new Date())/86400000);}
+
+// ---------- boot ----------
+function start(snap){
+  load();
+  if(snap&&snap.S)S=snap.S;
+  const h=(location.hash||"").slice(1);
+  if(["home","profile","assess","overview","results"].includes(h)&&(S.started||h==="home"||h==="profile"))S.view=h;
+  if(!S.started&&!["home","profile"].includes(S.view))S.view="home";
+  const d=daysLeft();document.getElementById("days").innerHTML=d>0?`<b>${d}</b> days to 1 Jan 2027`:"Parts I and III in force";
+  document.getElementById("home").addEventListener("click",()=>{if(S.example)S=blank();go("home");});
+  document.querySelectorAll(".crumb").forEach(b=>b.addEventListener("click",()=>{if(S.example&&b.dataset.go!=="results"){S=blank();go("home");return;}go(b.dataset.go);}));
+  window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(["home","profile","assess","overview","results"].includes(v)&&v!==S.view&&(S.started||v==="home"||v==="profile")){S.view=v;render();}});
+  window.claude?.hot?.snapshot?.(()=>({S}));
+  render();
+}
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
