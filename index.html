@@ -162,6 +162,19 @@ h1,h2,h3{text-wrap:balance}
 .action.bad{background:var(--bad-soft)} .action.warn{background:var(--warn-soft)}
 .action b{white-space:nowrap}
 .action .eff{font:500 11.5px var(--mono);color:var(--muted);white-space:nowrap;margin-left:auto;padding-top:2px}
+.steps{margin:10px 0 0;padding-left:20px;font-size:13.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.steps li::marker{color:var(--accent);font-weight:700}
+.action .body{flex:1}
+details.rm summary{cursor:pointer;list-style:none}
+details.rm summary::-webkit-details-marker{display:none}
+details.rm summary .hw{display:inline-block;margin-top:4px;font-size:12px;font-weight:600;color:var(--accent)}
+details.rm[open] summary .hw{color:var(--muted)}
+.col li .steps{font-size:13px}
+.col .steps li{padding:0}
+details.rm summary .hw::after{content:"Show steps"}
+details.rm[open] summary .hw::after{content:"Hide steps"}
+.fixes .steps{margin-top:8px}
+.notapply{margin:0 0 18px;padding:12px 16px;border-radius:12px;background:var(--gold-soft);font-size:14px}
 .notes{margin-top:14px}
 .notes summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);list-style:none}
 .notes summary::-webkit-details-marker{display:none}
@@ -363,7 +376,7 @@ function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.im
 function example(){
   const s=blank();
   Object.assign(s,{org:"Example: Colombo event studio",sector:"Events and media",size:"1–10 people",example:true,mode:"full",started:true,view:"results"});
-  s.profile={staff:"yes",special:"yes",children:"yes",vendors:"yes",processor:"yes",overseas:"yes",marketing:"yes",monitoring:"no",profiling:"no",website:"yes"};
+  s.profile={applicability:"yes",dpo:"no",network:"no",staff:"yes",special:"yes",children:"yes",vendors:"yes",processor:"yes",overseas:"yes",marketing:"yes",monitoring:"no",profiling:"no",website:"yes"};
   const base={gov:.15,inv:.25,law:.3,pur:.3,trn:.15,sec:.55,ven:.2,prc:.35,xbt:.1,bre:.15,dpi:.15,rgt:.15,mkt:.3};
   QUESTIONS.forEach(q=>{const h=hash(q.id),b=base[q.d];s.answers[q.id]=h<b?"yes":h<b+.3?"partly":h<b+.4?"unsure":"no";});
   s.answers.gov4="na";
@@ -393,6 +406,8 @@ function bucket(g){const p=phase(g.q)==="pending";if(g.q.w===3&&!p&&g.q.e!=="H")
 function counts(){const a=activeQs();return{total:a.length,done:a.filter(q=>S.answers[q.id]).length};}
 function mins(n){return Math.max(5,Math.round(n*.35/5)*5);}
 
+function stepsHtml(q){const st=STEPS[q.id]||[];return st.length?`<ol class="steps">${st.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:"";}
+function naNote(){return `<p class="notapply"><b>The Act may not apply to you.</b> Under s2 it covers processing wholly or partly in Sri Lanka, organisations based here, and anyone offering goods or services to, or monitoring, people in Sri Lanka. Purely personal or household use is excluded. You can still complete the check as good practice.</p>`;}
 // ---------- shell ----------
 const app=document.getElementById("app");
 function go(v){S.view=v;save();render();window.scrollTo({top:0});try{history.replaceState(null,"","#"+v);}catch(e){}}
@@ -432,7 +447,7 @@ function renderHome(){
     <p class="sub">You can switch to the full audit later without losing answers.</p>
     <div class="choices c2">
       <button class="choice" data-mode="quick" aria-pressed="${S.mode==="quick"}"><span class="tick"></span><h3>Quick check</h3><p>The critical obligations only. Best for a first look or a management briefing.</p><div class="meta"><span>up to ${nq} questions</span><span>~10 min</span></div></button>
-      <button class="choice" data-mode="full" aria-pressed="${S.mode==="full"}"><span class="tick"></span><h3>Full audit</h3><p>Every obligation in Parts I to IV, with evidence prompts. Best for a compliance programme or a consultant.</p><div class="meta"><span>up to ${nf} questions</span><span>~${mins(nf)} min</span></div></button>
+      <button class="choice" data-mode="full" aria-pressed="${S.mode==="full"}"><span class="tick"></span><h3>Full audit</h3><p>Every obligation in Parts I to IV, with evidence prompts and step-by-step fixes. Best for a compliance programme or a consultant.</p><div class="meta"><span>up to ${nf} questions</span><span>~${mins(nf)} min</span></div></button>
     </div>
     <div class="setup-go">
       <span class="note">${resume?`You have ${c.done} answers saved in this browser.`:"Nothing is uploaded. Your answers stay in this browser."}</span>
@@ -459,6 +474,7 @@ function renderProfile(){
   const n=activeQs().length;
   app.innerHTML=`
   <div class="page-h"><div><span class="eyebrow">Step 1 of 4</span><h1>Your organisation</h1><p>These answers decide which questions you'll see. If you're not sure, choose Yes; you can mark single questions N/A later.</p></div></div>
+  <div id="na-note">${S.profile.applicability==="no"?naNote():""}</div>
   <div class="panel">
     <div class="fields">
       <div class="field"><label for="org">Organisation name</label><input id="org" value="${esc(S.org)}" placeholder="e.g. Lanka Events (Pvt) Ltd" autocomplete="organization"></div>
@@ -475,7 +491,7 @@ function renderProfile(){
   app.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{
     S.profile[b.dataset.p]=b.dataset.v;save();
     app.querySelectorAll(`[data-p="${b.dataset.p}"]`).forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v===b.dataset.v)));
-    document.getElementById("nq").textContent=activeQs().length;
+    document.getElementById("nq").textContent=activeQs().length;document.getElementById("na-note").innerHTML=S.profile.applicability==="no"?naNote():"";
   }));
   document.getElementById("next").addEventListener("click",()=>{S.started=true;const qs=activeQs();S.cur=(qs.find(q=>!S.answers[q.id])||qs[0]).id;go("assess");});
 }
@@ -487,7 +503,7 @@ function renderAssess(){
   const c=counts();
   const doms=DOMAINS.filter(x=>qs.some(y=>y.d===x.id));
   const pend=phase(q)==="pending";
-  const fix=["no","partly","unsure"].includes(a)?`<div class="action ${a==="partly"?"warn":"bad"}"><b>Action</b><span>${esc(q.f)}</span><span class="eff">${ELBL[q.e]}</span></div>`:"";
+  const fix=["no","partly","unsure"].includes(a)?`<div class="action ${a==="partly"?"warn":"bad"}"><b>How to fix</b><div class="body">${esc(q.f)}${stepsHtml(q)}</div><span class="eff">${ELBL[q.e]}</span></div>`:"";
   app.innerHTML=`
   <div class="assess">
     <nav class="rail" aria-label="Areas">
@@ -574,7 +590,7 @@ function renderResults(){
   const C=2*Math.PI*86;const off=C*(1-(p??0)/100);
   const orgL=ORGS.find(o=>o[0]===S.orgType)[1];
   const col=(k,eb,title,sub)=>{const L=B[k];const lim=S["exp_"+k]?L.length:5;return `<div class="panel col"><div class="col-h"><span class="eyebrow">${eb}</span><h3>${title}</h3><span>${sub} · ${L.length} action${L.length===1?"":"s"}</span></div>
-    <ul>${L.slice(0,lim).map(g=>`<li>${esc(g.q.f)}<small>${esc(g.q.s)} · ${WLBL[g.q.w]} · ${ELBL[g.q.e]}</small></li>`).join("")||'<li style="color:var(--muted)">Nothing here.</li>'}</ul>
+    <ul>${L.slice(0,lim).map(g=>`<li><details class="rm"><summary>${esc(g.q.f)}<small>${esc(g.q.s)} · ${WLBL[g.q.w]} · ${ELBL[g.q.e]}</small><span class="hw"></span></summary>${stepsHtml(g.q)}</details></li>`).join("")||'<li style="color:var(--muted)">Nothing here.</li>'}</ul>
     ${L.length>5?`<button class="btn sm more" data-exp="${k}">${S["exp_"+k]?"Show fewer":"Show all "+L.length}</button>`:""}</div>`;};
   app.innerHTML=`
   <div class="page-h"><div><span class="eyebrow">Step 4 of 4 · ${esc(orgL)} · ${S.mode==="quick"?"Quick check":"Full audit"}</span><h1>${esc(S.org||"Your organisation")}</h1></div>
@@ -589,7 +605,7 @@ function renderResults(){
       <div>
         <span class="pill ${b.c}">${b.t}</span>
         <p class="verdict">${esc(b.v)}</p>
-        <p class="res-meta">This score covers the obligations in force from 1 January 2027 (Parts I and III). Parts II and IV, which have no commencement date yet, score <b>${pp===null?"–":pp+"%"}</b>.${c.done<c.total?` <b>${c.total-c.done} questions are unanswered</b>. <button class="btn link" id="toAssess" style="padding:0">Finish them</button> for an accurate score.`:""}</p>
+        ${S.profile.applicability==="no"?naNote():""}<p class="res-meta">This score covers the obligations in force from 1 January 2027 (Parts I and III). Parts II and IV, which have no commencement date yet, score <b>${pp===null?"–":pp+"%"}</b>.${c.done<c.total?` <b>${c.total-c.done} questions are unanswered</b>. <button class="btn link" id="toAssess" style="padding:0">Finish them</button> for an accurate score.`:""}</p>
       </div>
     </div>
     <div class="stats">
@@ -604,11 +620,11 @@ function renderResults(){
     <div class="panel">${doms.map(x=>{const bb=band(x.p);return `<div class="dom"><span class="nm">${esc(x.d.name)}<small>${esc(x.d.refs)}${x.d.phase==="pending"?" · not yet in force":""}</small></span><span class="bars"><i style="width:${x.p??0}%;background:${BCOL[bb.c]}"></i><span class="mk"></span></span><span class="pc">${x.p===null?"–":x.p+"%"}</span><span class="mt">${maturity(x.p)}${x.a<x.n?` · ${x.n-x.a} open`:""}</span></div>`;}).join("")}</div>
   </section>
 
-  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Critical gaps</span><h2>Fix these first</h2><p>Critical obligations you answered No or Not sure, in priority order. Select one to revisit it.</p></div></div>
-    <div class="panel"><ol class="fixes">${crit.length?crit.slice(0,10).map((g,i)=>`<li><span class="no">${String(i+1).padStart(2,"0")}</span><span><button data-jump="${g.q.id}">${esc(g.q.f)}</button><small>${esc(g.q.t)}</small></span><span class="rf">${esc(g.q.s)}</span></li>`).join(""):`<li><span></span><span>No critical gaps in your answers.</span><span></span></li>`}</ol></div>
+  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Critical gaps</span><h2>Fix these first</h2><p>Critical obligations you answered No or Not sure, in priority order, with the steps to close each one. Select a heading to revisit the question.</p></div></div>
+    <div class="panel"><ol class="fixes">${crit.length?crit.slice(0,10).map((g,i)=>`<li><span class="no">${String(i+1).padStart(2,"0")}</span><span><button data-jump="${g.q.id}">${esc(g.q.f)}</button><small>${esc(g.q.t)}</small>${stepsHtml(g.q)}</span><span class="rf">${esc(g.q.s)}</span></li>`).join(""):`<li><span></span><span>No critical gaps in your answers.</span><span></span></li>`}</ol></div>
   </section>
 
-  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Roadmap</span><h2>Your 30/60/90-day plan</h2><p>In-force critical items come first, then important items. Obligations from Parts II and IV follow.</p></div></div>
+  <section class="sect"><div class="sect-h"><div><span class="eyebrow">Roadmap</span><h2>Your 30/60/90-day plan</h2><p>In-force critical items come first, then important items. Obligations from Parts II and IV follow. Open any action to see exactly what to do.</p></div></div>
     <div class="road">${col("now","0–30 days","Now","Critical, in force")}${col("next","30–90 days","Next","Important")}${col("later","90+ days","Later","Good practice")}</div>
   </section>
 
@@ -646,7 +662,7 @@ function report(){
   const names={now:"Now (0–30 days)",next:"Next (30–90 days)",later:"Later (90+ days)"};
   L.push(`## Action plan`);
   ["now","next","later"].forEach(k=>{const xs=G.filter(g=>bucket(g)===k);if(!xs.length)return;L.push(`### ${names[k]}`);
-    xs.forEach((g,i)=>{L.push(`${i+1}. **${g.q.f}**  `);L.push(`   ${g.q.s} · ${WLBL[g.q.w]} · ${ELBL[g.q.e]} · answer: ${LBL[g.a]}${phase(g.q)==="pending"?" · not yet in force":""}  `);if(S.notes[g.q.id])L.push(`   Note: ${S.notes[g.q.id].replace(/\n/g," ")}`);});L.push("");});
+    xs.forEach((g,i)=>{L.push(`${i+1}. **${g.q.f}**  `);L.push(`   ${g.q.s} · ${WLBL[g.q.w]} · ${ELBL[g.q.e]} · answer: ${LBL[g.a]}${phase(g.q)==="pending"?" · not yet in force":""}  `);(STEPS[g.q.id]||[]).forEach((st,j)=>L.push(`   ${String.fromCharCode(97+j)}) ${st}  `));if(S.notes[g.q.id])L.push(`   Note: ${S.notes[g.q.id].replace(/\n/g," ")}`);});L.push("");});
   L.push(`## All answers`);
   DOMAINS.filter(d=>all.some(q=>q.d===d.id)).forEach(d=>{L.push(`### ${d.name}`);all.filter(q=>q.d===d.id).forEach(q=>L.push(`- [${LBL[S.answers[q.id]]||"Unanswered"}] ${q.t} (${q.s})${S.notes[q.id]?` | Note: ${S.notes[q.id].replace(/\n/g," ")}`:""}`));L.push("");});
   L.push(`_Self-assessment only, not legal advice. Check dpa.gov.lk for current rules, directives and guidelines._`);
@@ -655,8 +671,8 @@ function report(){
 function csv(){
   const qt=s=>`"${String(s).replace(/"/g,'""')}"`;
   const names={now:"Now (0-30 days)",next:"Next (30-90 days)",later:"Later (90+ days)"};
-  const rows=[["Phase","Action","Section","Priority","Effort","Current answer","Area","Applies from","Owner","Due date","Status","Notes"]];
-  gaps().forEach(g=>rows.push([names[bucket(g)],g.q.f,g.q.s,WLBL[g.q.w],ELBL[g.q.e],LBL[g.a],dById[g.q.d].name,phase(g.q)==="pending"?"Date to be gazetted":"1 Jan 2027","","","Open",S.notes[g.q.id]||""]));
+  const rows=[["Phase","Action","Steps","Section","Priority","Effort","Current answer","Area","Applies from","Owner","Due date","Status","Notes"]];
+  gaps().forEach(g=>rows.push([names[bucket(g)],g.q.f,(STEPS[g.q.id]||[]).map((x,j)=>(j+1)+". "+x).join("\n"),g.q.s,WLBL[g.q.w],ELBL[g.q.e],LBL[g.a],dById[g.q.d].name,phase(g.q)==="pending"?"Date to be gazetted":"1 Jan 2027","","","Open",S.notes[g.q.id]||""]));
   return rows.map(r=>r.map(qt).join(",")).join("\n");
 }
 async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg);}catch(e){const m=document.getElementById("modal"),t=document.getElementById("mtext");t.value=text;m.classList.remove("hidden");t.focus();t.select();}}
