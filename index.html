@@ -363,18 +363,102 @@ footer p{margin:0 0 10px}
   .qnav .hint{display:none}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* ---- responsive layer ---- */
+.crumb{display:inline-flex;align-items:center;gap:6px}
+.crumb i{font-style:normal;font:600 11px var(--mono);width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;border:1.5px solid currentColor;opacity:.8}
+.brand .bs{display:none}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+img,svg{max-width:100%}
+@media (max-width:1180px){.crumb span{display:none}.crumb[aria-current="page"] span{display:inline}}
+@media (max-width:1000px){.crumb span{display:inline}}
+@media (max-width:720px){
+  body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  .bar{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+  .bar .wrap{height:56px}
+  .brand .bl{display:none}.brand .bs{display:inline}
+  .brand b{font-size:18px}
+  .crumbs{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .crumb{flex-direction:column;gap:3px;padding:6px 2px;border-radius:10px;font-size:11px;font-weight:600}
+  .crumb span{display:block!important;font-size:10.5px;line-height:1.1}
+  .crumb i{width:22px;height:22px;font-size:11.5px}
+  .crumb[aria-current="page"]{background:var(--accent-soft)}
+  .crumb[aria-current="page"] i{background:var(--accent);border-color:var(--accent);color:#fff;opacity:1}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom));max-width:calc(100% - 32px);white-space:normal;text-align:center}
+  .field input,.field select,textarea{font-size:16px}
+  .hero{padding:28px 0 32px}
+  .hero h1{font-size:clamp(34px,10vw,46px)}
+  .hero p.lede{font-size:16px}
+  .clock .num{font-size:72px}
+  .page-h{padding:28px 0 18px}
+  .page-h h1{font-size:30px}
+  .exports{width:100%}
+  .exports .btn{flex:1 1 auto}
+  .setup-go{flex-direction:column;align-items:stretch}
+  .setup-go>div{flex-direction:column}
+  .setup-go .btn{width:100%}
+  .qcard{border-radius:16px}
+  .qtext{font-size:22px;margin-bottom:20px}
+  .ans{padding:12px 12px 10px}
+  .ans:last-child{grid-column:1/-1}
+  .action{flex-direction:column;gap:6px;padding:14px}
+  .action .eff{margin-left:0}
+  .qnav{gap:10px}
+  .qnav .auto{order:3;width:100%;justify-content:center}
+  .qnav .btn{flex:1}
+  .dots button{width:26px;height:26px}
+  .res-hero{justify-items:center;text-align:center}
+  .res-meta{margin:0 auto}
+  .ring{width:170px;height:170px}.ring svg{width:170px;height:170px}
+  .ring .v b{font-size:52px}
+  .stat b{font-size:28px}
+  .sect{margin-top:40px}
+  .sect-h h2{font-size:26px}
+  .col li{padding:10px 18px}
+  .doc{padding:24px 18px;font-size:13.5px;border-radius:12px}
+  .doc .lh{flex-direction:column-reverse;gap:10px}
+  .doc h1{font-size:26px}
+  .doc h2{font-size:19px;margin-top:30px}
+  .meta-t td:first-child{width:38%}
+  .summary-box{padding:18px;gap:10px;text-align:left}
+  .summary-box .big{font-size:48px}
+  .rt{font-size:12.5px}
+  .rt .mono{white-space:normal}
+  .rt.area th:nth-child(2),.rt.area td:nth-child(2){display:none}
+  .mbar{width:44px}
+  .finding{padding:14px}
+  .finding .fh{flex-direction:column;gap:4px}
+  .rp-tools{padding-top:20px}
+  .banner{flex-direction:column;align-items:stretch;text-align:left}
+  footer .cols{gap:24px}
+}
+@media (max-width:380px){
+  .wrap{padding:0 12px}
+  .answers{grid-template-columns:1fr 1fr;gap:8px}
+  .ans small{display:none}
+  .qcard{padding:22px 14px 18px}
+  .choice{padding:16px}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{padding:14px}
+}
+@media (min-width:1600px){
+  .wrap{max-width:1320px}
+  body{font-size:16px}
+}
+@media (hover:none){.ans:hover,.btn:hover{transform:none}}
+@media print{.crumbs{display:none!important}body{padding-bottom:0}}
 </style>
 </head>
 <body>
 <header class="bar">
   <div class="wrap">
-    <button class="brand" id="home" aria-label="Home"><span class="seal">PD</span><b>PDPA Readiness <i>Check</i></b></button>
+    <button class="brand" id="home" aria-label="Home"><span class="seal">PD</span><b><span class="bl">PDPA Readiness</span><span class="bs">PDPA</span> <i>Check</i></b></button>
     <nav class="crumbs" aria-label="Steps">
-      <button class="crumb" data-go="profile">1<span>&nbsp;· Profile</span></button>
-      <button class="crumb" data-go="assess">2<span>&nbsp;· Assessment</span></button>
-      <button class="crumb" data-go="overview">3<span>&nbsp;· Review</span></button>
-      <button class="crumb" data-go="results">4<span>&nbsp;· Results</span></button>
-      <button class="crumb" data-go="report">5<span>&nbsp;· Report</span></button>
+      <button class="crumb" data-go="profile"><i>1</i><span>Profile</span></button>
+      <button class="crumb" data-go="assess"><i>2</i><span>Assessment</span></button>
+      <button class="crumb" data-go="overview"><i>3</i><span>Review</span></button>
+      <button class="crumb" data-go="results"><i>4</i><span>Results</span></button>
+      <button class="crumb" data-go="report"><i>5</i><span>Report</span></button>
     </nav>
     <span class="days" id="days"></span>
   </div>
@@ -745,9 +829,9 @@ function reportDoc(sample){
   <p>This self-assessment tested the organisation against the obligations in the Act, using a question bank in which each item cites the section it tests. Scope was set by a profile in which these optional areas were marked applicable: ${prof.length?prof.map(k=>"<i>"+esc(k)+"</i>").join(", "):"none"}.</p>
   <p>Answers were scored Yes = 1, Partly = 0.5, No and Not sure = 0, with N/A excluded. Items are weighted 3 (critical), 2 (important) or 1 (good practice). Bands: 85%+ Ready, 60–84% Nearly ready, 35–59% Partially ready, below 35% Not ready. Responses were not independently verified.</p>
   <h2><span>03</span>Readiness by area</h2>
-  <table class="rt"><thead><tr><th>Area</th><th>Sections</th><th class="n">Score</th><th>Maturity</th></tr></thead><tbody>
+  <div class="tw"><table class="rt area"><thead><tr><th>Area</th><th>Sections</th><th class="n">Score</th><th>Maturity</th></tr></thead><tbody>
   ${doms.map(x=>{const bb=band(x.p);return `<tr><td>${esc(x.d.name)}${x.d.phase==="pending"?' <span class="ans-pill unsure">Not yet in force</span>':""}</td><td><span class="mono">${esc(x.d.refs)}</span></td><td class="n"><span class="mbar"><i style="width:${x.p??0}%;background:${BCOL[bb.c]}"></i></span>${x.p===null?"–":x.p+"%"}</td><td>${maturity(x.p)}</td></tr>`;}).join("")}
-  </tbody></table>
+  </tbody></table></div>
   <h2><span>04</span>Critical findings</h2>
   ${crit.length?crit.map((g,i)=>`<div class="finding"><div class="fh"><h3>${esc(g.q.f)}</h3><span class="fid">F${String(i+1).padStart(2,"0")} · ${g.q.id.toUpperCase()}</span></div>
     <dl><dt>Requirement</dt><dd>${esc(g.q.t)} <span style="font:500 11.5px var(--mono);color:var(--accent)">(${esc(g.q.s)})</span></dd>
@@ -756,13 +840,13 @@ function reportDoc(sample){
     <dt>Recommendation</dt><dd>${stepsHtml(g.q)}</dd>
     <dt>Evidence</dt><dd>${esc(g.q.ev)}</dd></dl></div>`).join(""):"<p>No critical findings: every critical obligation was answered Yes, Partly or N/A.</p>"}
   <h2><span>05</span>Remediation roadmap</h2>
-  <table class="rt hide-m"><thead><tr><th>#</th><th>Action</th><th>Section</th><th>Priority</th><th>Effort</th><th>Owner</th><th>Due</th></tr></thead><tbody>
+  <div class="tw"><table class="rt hide-m"><thead><tr><th>#</th><th>Action</th><th>Section</th><th>Priority</th><th>Effort</th><th>Owner</th><th>Due</th></tr></thead><tbody>
   ${["now","next","later"].map(k=>{const xs=G.filter(g=>bucket(g)===k);return xs.length?`<tr><td colspan="7" style="padding-top:16px;font-weight:700;border-bottom:1px solid var(--line)">${names[k]}</td></tr>`+xs.map(g=>{n++;return `<tr><td>${n}</td><td>${esc(g.q.f)}</td><td><span class="mono">${esc(g.q.s)}</span></td><td>${WLBL[g.q.w]}</td><td>${ELBL[g.q.e].replace(" effort","")}</td><td class="blank">________</td><td class="blank">______</td></tr>`;}).join(""):"";}).join("")||'<tr><td colspan="7">No actions required.</td></tr>'}
-  </tbody></table>
+  </tbody></table></div>
   <h2><span>A</span>Appendix: detailed responses</h2>
-  <table class="rt"><thead><tr><th>ID</th><th>Question</th><th>Section</th><th>Response</th></tr></thead><tbody>
+  <div class="tw"><table class="rt"><thead><tr><th>ID</th><th>Question</th><th>Section</th><th>Response</th></tr></thead><tbody>
   ${all.map(q=>`<tr><td><span class="mono">${q.id.toUpperCase()}</span></td><td>${esc(q.t)}${S.notes[q.id]?`<br><i style="color:var(--muted)">Note: ${esc(S.notes[q.id])}</i>`:""}</td><td><span class="mono">${esc(q.s)}</span></td><td>${pill(S.answers[q.id])}</td></tr>`).join("")}
-  </tbody></table>
+  </tbody></table></div>
   <h2><span>B</span>Sign-off</h2>
   <p>Management has reviewed this report and accepts the remediation roadmap.</p>
   <div class="sign"><div>Prepared by (privacy lead or DPO) and date</div><div>Approved by (owner or director) and date</div></div>
