@@ -6,7 +6,8 @@ A free self-assessment for Sri Lankan organisations preparing for the Personal D
 - Profile-based scoping (private / public authority / NGO; CCTV, marketing, overseas transfers, etc.)
 - Quick check (~10 min) or full audit (105 questions, each with step-by-step fixes)
 - Weighted readiness score for obligations in force from 1 January 2027, with Parts II and IV scored separately
-- Prioritised 30/60/90-day roadmap; report export (Markdown) and action plan export (CSV)
+- Prioritised 30/60/90-day roadmap with step-by-step fixes
+- Formal report tab (printable, with critical findings and sign-off), plus Markdown and CSV exports
 - Runs entirely in the browser — no data leaves the user's device
 
 ## Run it
