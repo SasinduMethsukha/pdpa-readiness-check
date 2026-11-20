@@ -4,6 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDPA Readiness Check</title>
+<meta name="description" content="Free self-assessment for Sri Lanka's Personal Data Protection Act (No. 9 of 2022, as amended in 2025). Every question cites its section. Get a score, your critical gaps and a step-by-step 30/60/90-day plan. Runs in your browser.">
+<meta name="theme-color" content="#F7F7F5">
+<link rel="canonical" href="https://pdpa-readiness-check.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PDPA Readiness Check">
+<meta property="og:title" content="PDPA Readiness Check: is your organisation ready for Sri Lanka's PDPA?">
+<meta property="og:description" content="Free self-assessment for Sri Lanka's Personal Data Protection Act (No. 9 of 2022, as amended in 2025). Every question cites its section. Get a score, your critical gaps and a step-by-step 30/60/90-day plan. Runs in your browser.">
+<meta property="og:url" content="https://pdpa-readiness-check.vercel.app/">
+<meta property="og:image" content="https://pdpa-readiness-check.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="PDPA Readiness Check: a readiness score with area-by-area results">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pdpa-readiness-check.vercel.app/og-image.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='29' fill='%23F7F7F5' stroke='%237A1631' stroke-width='4'/%3E%3Ctext x='32' y='41' font-family='Georgia,serif' font-size='24' font-weight='600' text-anchor='middle' fill='%237A1631'%3EPD%3C/text%3E%3C/svg%3E">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -364,6 +382,7 @@ footer p{margin:0 0 10px}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
+.legal{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px}
 /* ---- responsive layer ---- */
 .crumb{display:inline-flex;align-items:center;gap:6px}
 .crumb i{font-style:normal;font:600 11px var(--mono);width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;border:1.5px solid currentColor;opacity:.8}
@@ -482,6 +501,7 @@ img,svg{max-width:100%}
       </ul>
     </div>
   </div>
+  <div class="wrap legal"><span>© 2026 PDPA Readiness Check · Code <a href="https://github.com/SasinduMethsukha/pdpa-readiness-check/blob/main/LICENSE">MIT</a> · Question bank <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span><span><a href="privacy">Privacy</a> · <a href="terms">Terms</a> · <a href="https://github.com/SasinduMethsukha/pdpa-readiness-check">Source code</a></span></div>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal hidden" id="modal">

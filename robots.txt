@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pdpa-readiness-check.vercel.app/sitemap.xml
